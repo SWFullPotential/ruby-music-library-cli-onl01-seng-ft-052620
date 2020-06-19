@@ -1,5 +1,11 @@
 class Song 
-  attr_accessor :name, :artist, :genre
+  attr_accessor :name
+  attr_reader :artist, :genre
+
+  extend Concerns::Findable
+  extend Concerns::Creatable::ClassMethods
+  
+  include Concerns::Creatable::InstanceMethods
   
   @@all = []
   
@@ -8,37 +14,15 @@ class Song
   end
   
   def initialize(name, artist = nil, genre = nil)
-    @name = name
-    self.artist=(artist) if artist != nil
-    self.genre=(genre) if genre != nil
+    self.name = name
+    self.artist=(artist) if artist
+    self.genre=(genre) if genre 
   end
-  
-  def self.destroy_all
-    self.all.clear
-  end
-  
-  def save
-    self.class.all << self
-  end
-  
-  def self.create(song)
-    song = self.new(song)
-    song.save
-    song
-  end
-  
-  # def artist
-  #   @artist 
-  # end
-  
+    
   def artist=(artist)
     @artist = artist 
     artist.add_song(self)
   end
-  
-  # def genre
-  #   @genre
-  # end
   
   def genre=(genre)
     @genre = genre 
@@ -49,26 +33,25 @@ class Song
     @@all.find{|song| song.name == name}
   end
   
-   def self.find_or_create_by_name(name)
+  def self.find_or_create_by_name(name)
     if song = self.find_by_name(name)
       song
     else
       self.create(name)
     end
   end
-  def self.new_from_filename(filename)
-    array = filename.split(" - ")
+  def self.new_from_filename(file)
 
-    song_name = array[1]
-    artist_name = array[0]
-    genre_name = array[2].split(".mp3").join
+    artist_name, song_name, genre_name = file.split(" - ")
 
     artist = Artist.find_or_create_by_name(artist_name)
-    genre = Genre.find_or_create_by_name(genre_name)
+    genre = Genre.find_or_create_by_name(genre_name.gsub(".mp3", ""))
+   
     self.new(song_name, artist, genre)
   end
-def self.create_from_filename(filename)
-  self.new_from_filename(filename).save
-end
+
+  def self.create_from_filename(file)
+    self.new_from_filename(file).tap{|song| song.save}
+  end
   
 end

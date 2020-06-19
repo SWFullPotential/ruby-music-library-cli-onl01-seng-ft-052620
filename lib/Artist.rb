@@ -1,7 +1,9 @@
 class Artist 
   attr_accessor :name, :songs, :genres 
   extend Concerns::Findable
-  
+  extend Concerns::Creatable::ClassMethods
+  include Concerns::Creatable::InstanceMethods
+
   @@all = []
   
   def self.all 
@@ -9,22 +11,8 @@ class Artist
   end
   
   def initialize(name)
-    @name = name
-    @songs = []
-  end
-  
-  def self.destroy_all
-    self.all.clear
-  end
-  
-  def save
-    self.class.all << self
-  end
-  
-  def self.create(artist)
-    artist = self.new(artist)
-    artist.save
-    artist
+    self.name = name
+    self.songs = []
   end
   
   def songs 
@@ -32,31 +20,11 @@ class Artist
   end
   
   def add_song(song)
-    if song.artist == nil 
-      song.artist = self 
-    else
-      nil
-    end
-    if @songs.include?(song)
-        nil
-    else
-          @songs << song
-        end
-        song
+    song.artist = self unless song.artist
+    @songs << song unless @songs.include?(song)
   end
   
   def genres 
-    @new_array = []
-    @songs.each do |song|
-      if @new_array.include?(song.genre)
-        nil 
-      else
-        @new_array << song.genre 
-      end
+    self.songs.map {|song| song.genre}.uniq   
     end
-    @new_array
-  end
-  
-  
-  
 end

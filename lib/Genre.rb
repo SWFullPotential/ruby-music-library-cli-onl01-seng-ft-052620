@@ -1,6 +1,8 @@
 class Genre 
   attr_accessor :name, :songs 
   extend Concerns::Findable
+  extend Concerns::Creatable::ClassMethods
+  include Concerns::Creatable::InstanceMethods
   
   @@all = []
   
@@ -9,38 +11,16 @@ class Genre
   end
   
   def initialize(name)
-    @name = name
-    @songs = []
+    self.name = name
+    self.songs = []
   end
-  
-  def self.destroy_all
-    self.all.clear
-  end
-  
-  def save
-    self.class.all << self
-  end
-  
-  def self.create(genre)
-    genre = self.new(genre)
-    genre.save
-    genre
-  end
-  
+ 
   def songs 
     @songs
   end
   
-    def artists
-    @new_array = []
-    @songs.each do |song|
-      if @new_array.include?(song.artist)
-        nil
-      else
-        @new_array << song.artist
-      end
-    end
-    @new_array
+  def artists
+    self.songs.map {|song| song.artist}.uniq
   end
   
 end
